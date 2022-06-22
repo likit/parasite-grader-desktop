@@ -10,10 +10,12 @@ table = sg.Table(headings=['No.', 'ID', 'Name'], values=[], expand_x=True, expan
 layout = [
     [sg.Text('Students')],
     [table],
-    [sg.Input(key='-FILEPATH-'), sg.FileBrowse(key='-FILEBROWSE-', target='-FILEPATH-')],
+    [sg.Input(key='-FILEPATH-'), sg.FileBrowse(key='-FILEBROWSE-', target='-FILEPATH-', file_types=(('Excel', '*.xlsx'),))],
     [sg.Text('Sheet name')],
-    [sg.Input('Sheet1', key='-SHEETNAME-')],
-    [sg.Button('Open'), sg.Exit()],
+    [sg.Input('Sheet1', key='-SHEETNAME-'), sg.Button('Open')],
+    [sg.Text('Save As')],
+    [sg.InputText(key='-SAVE-PATH-'), sg.SaveAs('Browse', file_types=(("Excel", "*.xlsx"),)), sg.Button('Save')],
+    [sg.Exit()],
 ]
 
 window = sg.Window('Parasite Grader', layout=layout)
@@ -35,6 +37,12 @@ while True:
         rec = create_record_window(student_record, records[index])
         records.pop(index)
         records.insert(index, rec)
+    elif event == 'Save':
+        rows = []
+        for rec in records:
+            rows += [item for item in rec if item[2] or item[3]]
+        df = pd.DataFrame(rows)
+        df.to_excel(values['-SAVE-PATH-'], index=False)
 
 
 

@@ -5,7 +5,7 @@ from organisms import organisms, stages
 
 def create_record_window(student_record, record):
     # check if the record exists
-    record = [item for item in record if item[1] == student_record[1]]
+    record = [item for item in record if item[0] == student_record[1]]
     combos = []
     for i in range(0, 10):
         try:
@@ -47,8 +47,8 @@ def create_record_window(student_record, record):
             record = []
             for i in range(0, 10):
                 record.append([
-                    student_record[0],
                     student_record[1],
+                    student_record[2],
                     values[f'-ORG{i}-'],
                     values[f'-STG{i}-'],
                     values[f'-ORG{i}-CHK-'],
