@@ -1,4 +1,5 @@
 organisms = [
+    '',
     'Plasmodium vivax',
     'Plasmodium malariae',
     'Plasmodium falciparum',
@@ -6,6 +7,7 @@ organisms = [
 ]
 
 stages = [
+    '',
     'ring form',
     'schizont',
     'gametocyte',

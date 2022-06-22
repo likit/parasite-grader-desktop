@@ -3,9 +3,10 @@ import PySimpleGUI as sg
 from organisms import organisms, stages
 
 
-def create_record_window(student_record, record):
+def create_record_window(student_record, items):
     # check if the record exists
-    record = [item for item in record if item[0] == student_record[1]]
+    print(items)
+    record = [item for item in items if item[0] == student_record[1]]
     combos = []
     for i in range(0, 10):
         try:
@@ -31,8 +32,8 @@ def create_record_window(student_record, record):
                 ],
             )
     layout = [
-        [sg.Text('ID'), sg.Text(student_record[0])],
-        [sg.Text('Name'), sg.Text(student_record[1])],
+        [sg.Text('ID'), sg.Text(student_record[1])],
+        [sg.Text('Name'), sg.Text(student_record[2])],
         *combos,
         [sg.Button('Save')]
     ]
