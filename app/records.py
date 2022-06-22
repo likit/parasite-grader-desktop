@@ -15,15 +15,19 @@ def create_record_window(student_record, record):
                 [
                     sg.Text(f'{i}:'),
                     sg.Combo(organisms, key=f'-ORG{i}-', readonly=True),
-                    sg.Combo(stages, key=f'-STG{i}-', readonly=True)
-                 ],
+                    sg.Combo(stages, key=f'-STG{i}-', readonly=True),
+                    sg.Checkbox('ORG:', key=f'-ORG{i}-CHK-', default=True),
+                    sg.Checkbox('STAGE:', key=f'-STG{i}-CHK-', default=True),
+                ],
             )
         else:
             combos.append(
                 [
                     sg.Text(f'{i}:'),
                     sg.Combo(organisms, key=f'-ORG{i}-', readonly=True, default_value=item[2]),
-                    sg.Combo(stages, key=f'-STG{i}-', readonly=True, default_value=item[3])
+                    sg.Combo(stages, key=f'-STG{i}-', readonly=True, default_value=item[3]),
+                    sg.Checkbox('ORG:', key=f'-ORG{i}-CHK-', default=item[4]),
+                    sg.Checkbox('STAGE:', key=f'-STG{i}-CHK-', default=item[5]),
                 ],
             )
     layout = [
@@ -46,7 +50,9 @@ def create_record_window(student_record, record):
                     student_record[0],
                     student_record[1],
                     values[f'-ORG{i}-'],
-                    values[f'-STG{i}-']
+                    values[f'-STG{i}-'],
+                    values[f'-ORG{i}-CHK-'],
+                    values[f'-STG{i}-CHK-'],
                 ])
             break
 
