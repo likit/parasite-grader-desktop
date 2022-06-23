@@ -5,7 +5,6 @@ from organisms import organisms, stages
 
 def create_record_window(student_record, items):
     # check if the record exists
-    print(items)
     record = [item for item in items if item[0] == student_record[1]]
     combos = []
     for i in range(0, 10):

@@ -1,5 +1,6 @@
 organisms = [
     '',
+    'Plasmodium spp.',
     'Plasmodium vivax',
     'Plasmodium malariae',
     'Plasmodium falciparum',
@@ -9,6 +10,7 @@ organisms = [
 stages = [
     '',
     'ring form',
+    'growing trophozoite',
     'schizont',
     'gametocyte',
     'merozoite'

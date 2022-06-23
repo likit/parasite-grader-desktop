@@ -10,7 +10,8 @@ table = sg.Table(headings=['No.', 'ID', 'Name'], values=[], expand_x=True, expan
 layout = [
     [sg.Text('Students')],
     [table],
-    [sg.Input(key='-FILEPATH-'), sg.FileBrowse(key='-FILEBROWSE-', target='-FILEPATH-', file_types=(('Excel', '*.xlsx'),))],
+    [sg.Input(key='-FILEPATH-'),
+     sg.FileBrowse(key='-FILEBROWSE-', target='-FILEPATH-', file_types=(('Excel', '*.xlsx'),))],
     [sg.Text('Sheet name')],
     [sg.Input('Sheet1', key='-SHEETNAME-'), sg.Button('Open')],
     [sg.Text('Save As')],
@@ -20,7 +21,7 @@ layout = [
     [sg.Exit()],
 ]
 
-window = sg.Window('Parasite Grader', layout=layout)
+window = sg.Window('Parasite Grader', layout=layout, resizable=True)
 student_names = []
 records = []
 
@@ -80,7 +81,4 @@ while True:
         records.append(items)
         sg.popup_notify('Loaded data successfully.')
 
-
-
 window.close()
-
