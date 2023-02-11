@@ -1,8 +1,10 @@
 import PySimpleGUI as sg
+import pathlib
 import pandas as pd
 from records import create_record_window
 
 sg.theme('BlueMono')
+sg.set_options(font=('Helvetica', 18, 'normal'))
 table = sg.Table(headings=['No.', 'ID', 'Name'], values=[], expand_x=True, expand_y=True,
                  auto_size_columns=True, display_row_numbers=True,
                  enable_events=True, key='-STUDENTTABLE-')
@@ -10,6 +12,7 @@ table = sg.Table(headings=['No.', 'ID', 'Name'], values=[], expand_x=True, expan
 layout = [
     [sg.Text('Students')],
     [table],
+    [sg.Text('Students File')],
     [sg.Input(key='-FILEPATH-'),
      sg.FileBrowse(key='-FILEBROWSE-', target='-FILEPATH-', file_types=(('Excel', '*.xlsx'),))],
     [sg.Text('Sheet name')],
@@ -18,12 +21,13 @@ layout = [
     [sg.InputText(key='-SAVE-PATH-'), sg.SaveAs('Browse', file_types=(("Excel", "*.xlsx"),)), sg.Button('Save')],
     [sg.Text('Load Records')],
     [sg.InputText(key='-LOAD-PATH-'), sg.FileBrowse('Browse', file_types=(("Excel", "*.xlsx"),)), sg.Button('Load')],
-    [sg.Exit()],
+    [sg.Exit(), sg.Button('Tally Up', key='-TALLY-')],
 ]
 
 window = sg.Window('Parasite Grader', layout=layout, resizable=True)
 student_names = []
 records = []
+scores = []
 
 while True:
     event, values = window.read()
@@ -42,8 +46,9 @@ while True:
                     row[2],
                     None,
                     None,
-                    True,
-                    True,
+                    None,
+                    None,
+                    False,
                 ])
             records.append(items)
     elif event == '-STUDENTTABLE-':
@@ -57,7 +62,15 @@ while True:
         for rec in records:
             data_rows += [*rec]
         df = pd.DataFrame(data_rows)
-        df.to_excel(values['-SAVE-PATH-'], index=False)
+        save_path = values['-SAVE-PATH-']
+        if not pathlib.Path(save_path).suffix:
+            save_path = pathlib.Path(save_path + '.xlsx')
+        with pd.ExcelWriter(save_path) as Writer:
+            df.to_excel(Writer, index=False, sheet_name='records')
+            if scores:
+                score_df = pd.DataFrame(scores)
+                score_df.to_excel(Writer, index=False, sheet_name='scores')
+        sg.popup_notify('Data have been saved successfully.')
     elif event == 'Load':
         if not student_names:
             sg.popup_error('Students name not found.\nPlease load the student file and try again.')
@@ -79,6 +92,24 @@ while True:
                 items = [row.to_list()]
                 current_id = row[1]
         records.append(items)
-        sg.popup_notify('Loaded data successfully.')
+        sg.popup_notify('Data have been loaded successfully.')
+    elif event == '-TALLY-':
+        scores = []  # reset scores
+        for rec in records:
+            score = 0
+            for item in rec:
+                if not item[6]:  # if not rare
+                    if item[2]:
+                        if item[4] and item[2] != item[4]:
+                            score -= 2
+                        else:
+                            score += 5
+                    if item[3]:
+                        if item[5] and item[3] != item[5]:
+                            score -= 1
+                        else:
+                            score += 0
+            scores.append([item[0], item[1], score])
+        sg.popup_notify('Finished tallying.')
 
 window.close()

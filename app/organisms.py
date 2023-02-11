@@ -1,18 +1,37 @@
-organisms = [
-    '',
+organisms = [''] + sorted([
+    'Ascaris lumbricoides',
+    'Fasciolopsis',
+    'Opisthorchis spp.',
     'Plasmodium spp.',
     'Plasmodium vivax',
     'Plasmodium malariae',
     'Plasmodium falciparum',
     'Plasmodium ovale',
-]
+    'Strongyloides stercolaris',
+    'Taenia spp.',
+    'Trichuris trichiura',
+    'Hookworm',
+    'Hymenolepis nana',
+    'Hymenolepis diminuta',
+    'Entamoeba coli',
+    'Entamoeba histolytica',
+    'Endolimax nana',
+    'Blastocystis hominis',
+    'Artifact',
+    'Giardia lamblia',
+])
 
-stages = [
-    '',
+stages = [''] + sorted([
+    'adult',
+    'cyst',
+    'egg',
     'ring form',
+    'gametocyte',
     'growing trophozoite',
     'growing trophozoite (band form)',
+    'rhabditiform larvae',
+    'filariform larvae',
+    'merozoite',
     'schizont',
-    'gametocyte',
-    'merozoite'
-]
+    'vacuolar form',
+])

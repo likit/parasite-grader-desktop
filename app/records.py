@@ -16,8 +16,9 @@ def create_record_window(student_record, items):
                     sg.Text(f'{i}:'),
                     sg.Combo(organisms, key=f'-ORG{i}-', readonly=True),
                     sg.Combo(stages, key=f'-STG{i}-', readonly=True),
-                    sg.Checkbox('ORG:', key=f'-ORG{i}-CHK-', default=True),
-                    sg.Checkbox('STAGE:', key=f'-STG{i}-CHK-', default=True),
+                    sg.Checkbox('Rare', key=f'-RARE{i}-', default=False),
+                    sg.Combo(organisms, key=f'-KEYORG{i}-', readonly=True),
+                    sg.Combo(stages, key=f'-KEYSTG{i}-', readonly=True),
                 ],
             )
         else:
@@ -26,13 +27,20 @@ def create_record_window(student_record, items):
                     sg.Text(f'{i}:'),
                     sg.Combo(organisms, key=f'-ORG{i}-', readonly=True, default_value=item[2]),
                     sg.Combo(stages, key=f'-STG{i}-', readonly=True, default_value=item[3]),
-                    sg.Checkbox('ORG:', key=f'-ORG{i}-CHK-', default=item[4]),
-                    sg.Checkbox('STAGE:', key=f'-STG{i}-CHK-', default=item[5]),
+                    sg.Checkbox('Rare', key=f'-RARE{i}-', default=item[6]),
+                    sg.Combo(organisms, key=f'-KEYORG{i}-', readonly=True, default_value=item[4]),
+                    sg.Combo(stages, key=f'-KEYSTG{i}-', readonly=True, default_value=item[5]),
                 ],
             )
     layout = [
         [sg.Text('ID'), sg.Text(student_record[1])],
         [sg.Text('Name'), sg.Text(student_record[2])],
+        [
+            sg.Text('Organism', justification='center', expand_x=True),
+            sg.Text('Stage', justification='center', expand_x=True),
+            sg.Text('Correct Organism', justification='center', expand_x=True),
+            sg.Text('Correct Stage', justification='center', expand_x=True)
+        ],
         *combos,
         [sg.Button('Save')]
     ]
@@ -51,8 +59,9 @@ def create_record_window(student_record, items):
                     student_record[2],
                     values[f'-ORG{i}-'],
                     values[f'-STG{i}-'],
-                    values[f'-ORG{i}-CHK-'],
-                    values[f'-STG{i}-CHK-'],
+                    values[f'-KEYORG{i}-'],
+                    values[f'-KEYSTG{i}-'],
+                    values[f'-RARE{i}-'],
                 ])
             break
 
