@@ -97,13 +97,16 @@ while True:
         scores = []  # reset scores
         for rec in records:
             score = 0
+            corrects = set()
             for item in rec:
                 if not item[6]:  # if not rare
                     if item[2]:
                         if item[4] and item[2] != item[4]:
                             score -= 2
                         else:
-                            score += 5
+                            if item[2] not in corrects:
+                                score += 5
+                                corrects.add(item[2])
                     if item[3]:
                         if item[5] and item[3] != item[5]:
                             score -= 1
