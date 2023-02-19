@@ -19,6 +19,8 @@ organisms = [''] + sorted([
     'Blastocystis hominis',
     'Artifact',
     'Giardia lamblia',
+    'Yeast',
+    'Iodamoeba butschlii'
 ])
 
 stages = [''] + sorted([
