@@ -1,7 +1,37 @@
+from collections import defaultdict
+
 import PySimpleGUI as sg
 import pathlib
 import pandas as pd
 from records import create_record_window
+
+
+def create_report_output_window(reports, names, score_dict):
+    layout = [
+        [sg.Output(size=(80, 20))],
+        [sg.Button('Close', button_color='red')]
+    ]
+
+    window = sg.Window('Report', resizable=True, modal=True, finalize=True, layout=layout)
+
+    for stuid in reports:
+        message = f'{names[stuid]} {stuid}\n'
+        message += '=' * 50
+        message += f'คะแนน {score_dict.get(stuid)}\n'
+        message += 'คำตอบ -> เฉลย\n'
+        message += '\n'.join(reports[stuid])
+        message += '\n'
+        message += '-' * 50
+        print(message)
+        window.refresh()
+
+    while True:
+        event, values = window.read()
+        if event in ('Exit', sg.WINDOW_CLOSED, 'Close'):
+            break
+
+    window.close()
+
 
 sg.theme('BlueMono')
 sg.set_options(font=('Helvetica', 18, 'normal'))
@@ -21,13 +51,14 @@ layout = [
     [sg.InputText(key='-SAVE-PATH-'), sg.SaveAs('Browse', file_types=(("Excel", "*.xlsx"),)), sg.Button('Save')],
     [sg.Text('Load Records')],
     [sg.InputText(key='-LOAD-PATH-'), sg.FileBrowse('Browse', file_types=(("Excel", "*.xlsx"),)), sg.Button('Load')],
-    [sg.Exit(), sg.Button('Tally Up', key='-TALLY-')],
+    [sg.Exit(), sg.Button('Tally Up', key='-TALLY-'), sg.Button('View Report', key='-SCORE-REPORT-')],
 ]
 
 window = sg.Window('Parasite Grader', layout=layout, resizable=True)
 student_names = []
 records = []
 scores = []
+score_dict = {}
 
 while True:
     event, values = window.read()
@@ -57,6 +88,23 @@ while True:
         rec = create_record_window(student_record, records[index])
         records.pop(index)
         records.insert(index, rec)
+    elif event == '-SCORE-REPORT-':
+        reports = defaultdict(list)
+        names = {}
+        for rec in records:
+            for stuid, name, ans_org, ans_stage, key_org, key_stage, rare in rec:
+                if ans_org:
+                    key_org = '' if key_org and (key_org == ans_org) else key_org
+                    key_stage = '' if key_stage and (key_stage == ans_stage) else key_stage
+                    key_stage_report = f'{key_stage} X' if key_stage else ans_stage
+                    if not key_org != ans_org:  # do not show stage if the org is not correct
+                        key_stage_report = ''
+                    key_org_report = f'{key_org} X' if key_org else ans_org
+                    rare = '(rare)' if rare else ''
+                    reports[stuid].append(f'{ans_org} {ans_stage} -> {key_org_report} {key_stage_report} {rare}')
+                    names[stuid] = name
+        create_report_output_window(reports, names, score_dict)
+
     elif event == 'Save':
         data_rows = []
         for rec in records:
@@ -92,27 +140,32 @@ while True:
                 items = [row.to_list()]
                 current_id = row[1]
         records.append(items)
+        window.find_element('-SAVE-PATH-').update(file_path)
         sg.popup_notify('Data have been loaded successfully.')
     elif event == '-TALLY-':
         scores = []  # reset scores
+        score_dict = {}
         for rec in records:
             score = 0
             corrects = set()
-            for item in rec:
-                if not item[6]:  # if not rare
-                    if item[2]:
-                        if item[4] and item[2] != item[4]:
+            for stuid, name, ans_org, ans_stage, key_org, key_stage, rare in rec:
+                if not rare:  # if not rare
+                    if ans_org:
+                        if key_org and ans_org != key_org:
                             score -= 2
                         else:
-                            if item[2] not in corrects:
+                            if ans_org not in corrects:
                                 score += 5
-                                corrects.add(item[2])
-                    if item[3]:
-                        if item[5] and item[3] != item[5]:
-                            score -= 1
-                        else:
-                            score += 0
-            scores.append([item[0], item[1], score])
+                                corrects.add(ans_org)
+                    if ans_stage:
+                        # do not penalize for a wrong stage if an organism is wrong
+                        if (key_org != '') or (key_org == ans_org):
+                            if key_stage and ans_stage != key_stage:
+                                score -= 1
+                            else:
+                                score += 0
+            scores.append([stuid, name, score])
+            score_dict[stuid] = score
         sg.popup_notify('Finished tallying.')
 
 window.close()
