@@ -20,10 +20,11 @@ organisms = [''] + sorted([
     'Artifact',
     'Giardia lamblia',
     'Yeast',
-    'Iodamoeba butschlii'
+    'Iodamoeba butschlii',
 ])
 
 stages = [''] + sorted([
+    '-',
     'adult',
     'cyst',
     'egg',
@@ -33,7 +34,16 @@ stages = [''] + sorted([
     'growing trophozoite (band form)',
     'rhabditiform larvae',
     'filariform larvae',
+    'larvae',
     'merozoite',
     'schizont',
     'vacuolar form',
+    'sexual form',
+    'asexual form',
+    'embryonated egg',
+    'unfertilized egg',
+    'decorticated egg',
+    'fertilized egg',
+    'pre-cyst'
+
 ])
