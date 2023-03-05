@@ -44,6 +44,7 @@ stages = [''] + sorted([
     'unfertilized egg',
     'decorticated egg',
     'fertilized egg',
-    'pre-cyst'
+    'pre-cyst',
+    'trophozoite',
 
 ])
