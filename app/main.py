@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 import PySimpleGUI as sg
 import pathlib
@@ -6,29 +6,61 @@ import pandas as pd
 from records import create_record_window
 
 
-def create_report_output_window(reports, names, score_dict):
+def print_ascii_bar_chart(data, symbol=":"):
+    counter = Counter(data)
+    chart = {category: symbol * frequency for category, frequency in counter.items()}
+    max_len = max(len(category) for category in chart)
+    for category, frequency in chart.items():
+        padding = (max_len - len(category)) * " "
+        print(f"{category}{padding} |{frequency}")
+
+
+def create_report_output_window(reports, names, score_dict, organism_counts):
     layout = [
         [sg.Output(size=(80, 20))],
-        [sg.Button('Close', button_color='red')]
+        [sg.Button('Close', button_color='red'), sg.Button('Save')]
     ]
 
     window = sg.Window('Report', resizable=True, modal=True, finalize=True, layout=layout)
 
     for stuid in reports:
-        message = f'{names[stuid]} {stuid}\n'
+        message = '-' * 50
+        message += f'\n{names[stuid]} {stuid}\n'
         message += '=' * 50
-        message += f'คะแนน {score_dict.get(stuid)}\n'
-        message += 'คำตอบ -> เฉลย\n'
+        message += f'\nคะแนน {score_dict.get(stuid)}\n'
+        message += '-' * 50
+        message += '\nคำตอบ -> เฉลย\n'
         message += '\n'.join(reports[stuid])
         message += '\n'
-        message += '-' * 50
         print(message)
-        window.refresh()
+
+    print('\nRight answer = +5, rare = 0, wrong genus and species = -2, wrong stage = -1')
+    print('\n\nSummary\n')
+    print_ascii_bar_chart(answers)
+    window.refresh()
 
     while True:
         event, values = window.read()
         if event in ('Exit', sg.WINDOW_CLOSED, 'Close'):
             break
+        elif event == 'Save':
+            filepath = sg.popup_get_file('Please select the output file', title='Save As', save_as=True)
+            with open(filepath, 'w') as fp:
+                for stuid in reports:
+                    message = '-' * 50
+                    message += f'\n{names[stuid]} {stuid}\n'
+                    message += '=' * 50
+                    message += f'\nคะแนน {score_dict.get(stuid)}\n'
+                    message += '-' * 50
+                    message += '\nคำตอบ -> เฉลย\n'
+                    message += '\n'.join(reports[stuid])
+                    message += '\n\n'
+                    fp.write(message)
+
+                fp.write('\n\nRight answer = +5, rare = 0, wrong genus and species = -2, wrong stage = -1\n')
+            sg.popup_notify('Saved data successfully', fade_in_duration=0, display_duration_in_ms=500)
+
+
 
     window.close()
 
@@ -91,19 +123,26 @@ while True:
     elif event == '-SCORE-REPORT-':
         reports = defaultdict(list)
         names = {}
+        answers = []
         for rec in records:
             for stuid, name, ans_org, ans_stage, key_org, key_stage, rare in rec:
                 if ans_org:
-                    key_org = '' if key_org and (key_org == ans_org) else key_org
-                    key_stage = '' if key_stage and (key_stage == ans_stage) else key_stage
-                    key_stage_report = f'{key_stage} X' if key_stage else ans_stage
-                    if not key_org != ans_org:  # do not show stage if the org is not correct
+                    key_org = '' if key_org == ans_org else key_org
+                    key_stage = '' if key_stage == ans_stage else key_stage
+                    key_stage_report = f'{key_stage} -1' if key_stage else ''
+                    # do not show a stage if an organism is not correct
+                    if (key_org != '') and (key_org != ans_org):
                         key_stage_report = ''
-                    key_org_report = f'{key_org} X' if key_org else ans_org
+                    key_org_report = f'{key_org} -2' if key_org else '+5'
                     rare = '(rare)' if rare else ''
+                    if key_stage:
+                        print(stuid, ans_stage, key_stage)
+                        print(key_stage_report)
+                        print(f'{ans_org} {ans_stage} -> {key_org_report} {key_stage_report} {rare}')
                     reports[stuid].append(f'{ans_org} {ans_stage} -> {key_org_report} {key_stage_report} {rare}')
                     names[stuid] = name
-        create_report_output_window(reports, names, score_dict)
+                    answers.append(ans_org)
+        create_report_output_window(reports, names, score_dict, answers)
 
     elif event == 'Save':
         data_rows = []
@@ -118,7 +157,7 @@ while True:
             if scores:
                 score_df = pd.DataFrame(scores)
                 score_df.to_excel(Writer, index=False, sheet_name='scores')
-        sg.popup_notify('Data have been saved successfully.')
+        sg.popup_notify('Data have been saved successfully.', display_duration_in_ms=500, fade_in_duration=0)
     elif event == 'Load':
         if not student_names:
             sg.popup_error('Students name not found.\nPlease load the student file and try again.')
@@ -141,7 +180,7 @@ while True:
                 current_id = row[1]
         records.append(items)
         window.find_element('-SAVE-PATH-').update(file_path)
-        sg.popup_notify('Data have been loaded successfully.')
+        sg.popup_notify('Data have been loaded successfully.', display_duration_in_ms=500, fade_in_duration=0)
     elif event == '-TALLY-':
         scores = []  # reset scores
         score_dict = {}
@@ -166,6 +205,6 @@ while True:
                                 score += 0
             scores.append([stuid, name, score])
             score_dict[stuid] = score
-        sg.popup_notify('Finished tallying.')
+        sg.popup_notify('Finished tallying.', display_duration_in_ms=500, fade_in_duration=0)
 
 window.close()
